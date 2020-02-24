@@ -92,7 +92,7 @@ class NFA:
         self.stack.append(Node(left=node_A, label=ch, right=node_B))
       elif ch == '+': #rr*
         node_A = self.stack.pop()
-        node_B = Node(left=node_A, label='*'))
+        node_B = Node(left=node_A, label='*')
         self.stack.append(Node(left=node_A, label='.', right=node_B))
       elif ch == '?': #r|ɛ
         node_A = self.stack.pop()
