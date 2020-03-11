@@ -73,9 +73,9 @@ class Conversion:
         print ("".join(self.output) )
   
 # Driver program to test above function 
-#exp = "(a|b)*.a.b.b"
+exp = "(a|b)*.a.b.b.c"
 #exp = "b*.a.b|#"
-exp = "b*.a.b?" #
+#exp = "b*.a.b?" #
 obj = Conversion(len(exp)) 
 obj.infixToPostfix(exp) 
   

@@ -1,3 +1,4 @@
+from draw import drawDFA
 
 class Node():
     def __init__(self,  label, left=None,right=None):
@@ -100,6 +101,8 @@ def move(states, transitions, value):
                     group.add(element)  
     return group
 
+
+
 class NFA:
     '''
         crea un arbol según una expresión en posfix
@@ -116,6 +119,7 @@ class NFA:
             elif ch == '.' or ch =='|':
                 node_A = self.stack.pop()
                 node_B = self.stack.pop()
+                #revisar esto!!!!
                 self.stack.append(Node(left=node_A, label=ch, right=node_B))
             elif ch == '+': #rr*
                 node_A = self.stack.pop()
@@ -139,6 +143,7 @@ class NFA:
                 self.language += (letter)
     
     def getCore(self):
+        drawDFA(self.states, self.transitions)
         return (self.start, self.states, self.transitions, self.language, self.accept)
   
     def check(self, expre):
@@ -152,13 +157,13 @@ class NFA:
 
 class DFA:
     def __init__(self):
-        self.start = set()
+        self.start = None #start puede ser varios?
         self.states = []
         self.transitions = {}
         self.language = None
         self.accept = set()
   
-    def createFromDFA(self, core_transitions, language):
+    def createFromDFA(self, start, core_transitions, language, accept):
         transitions = {}
         Dstate = [closure([0], core_transitions)]
         letters = 'ABCDEFGHI'
@@ -173,33 +178,65 @@ class DFA:
                     Dstate.append(U)
 
                 if letters[count] in transitions.keys(): 
-                    if letter in transitions[letters[count]].keys():
-                        transitions[letters[count]][letter].append(letters[Dstate.index(U)])
-                    else:
-                        transitions[letters[count]][letter] = [letters[Dstate.index(U)]]
+                    transitions[letters[count]][letter] =  letters[Dstate.index(U)]
                 else: 
-                    transitions[letters[count]] = {letter: [letters[Dstate.index(U)]]}
+                    transitions[letters[count]] = {letter: letters[Dstate.index(U)]}
             count += 1
-        print(Dstate)
-        print(transitions)
-        print(letters[:count])
-        #print(self.transitions[1]['#'])
-  
-    def check(self, expre):
+        for i in range(len(Dstate)):
+            if start in Dstate[i]:
+                self.start = letters[i]
+            if accept in Dstate[i]:
+                self.accept.add(letters[i])
+        self.language = language
+        self.transitions = transitions
+        self.states = letters[:count]
         
+        #print(self.transitions[1]['#'])
+    
+    #def get_minimize(self):
+    #    states = []
+    #    transitions
+
+
+    def getCore(self):
+        drawDFA(self.states, self.transitions)
+        return (self.start, self.states, self.transitions, self.language, self.accept)
+  
+    def move(self, state, transitions, value):
+        s = state
+        if value in transitions[s].keys():
+            for element in transitions[s][value]:
+                s = element
+        return s
+
+    def check(self, expre):
+        s = self.start
+        for letter in expre:
+            s = self.move(s, self.transitions, letter)
+        print(s)
+        print(self.accept)
+        if s in self.accept:
+            return True
         return False
     
 
   
-
+EXPRE = 'aaabbbabb'
 #test = input('to evaluate: ')
 nfa = NFA('ab|*a.b.b.')
 nfa_core = nfa.getCore()
-print(nfa_core[0])
-print(nfa_core[1])
-print(nfa_core[2])
-#dfa = DFA()
-#dfa.createFromDFA(core_transitions=nfa_core[2], language=nfa_core[3])
-#nfa.convertToDFA()
+#print(nfa_core[0])
+#print(nfa_core[1])
+#print(nfa_core[2])
+#print(EXPRE, nfa.check(EXPRE))
+dfa = DFA()
+dfa.createFromDFA(start=nfa_core[0], core_transitions=nfa_core[2], language=nfa_core[3], accept=nfa_core[4])
+dfa_core = dfa.getCore()
+#print(dfa_core[0])
+#print(dfa_core[1])
+#print(dfa_core[2])
+#print(dfa_core[3])
+#print(dfa_core[4])
+#print(EXPRE, dfa.check(EXPRE))
 
 
