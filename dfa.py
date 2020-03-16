@@ -65,8 +65,10 @@ class Node():
                 self.firstpos = A
         elif self.label == '*':
             self.firstpos = self.left.setFirstPos()
-        elif self.label != '#':
+        #elif self.label != '#':
+        else:
             self.firstpos.add(self.position)
+
         if self.right != None and self.left != None:
             print((self.left.label, self.label, self.right.label), self.firstpos)
         elif self.label == '*':
@@ -89,8 +91,10 @@ class Node():
                 self.lastpos = B
         elif self.label == '*':
             self.lastpos = self.left.setLastPos()
-        elif self.label != '#':
+        #elif self.label != '#':
+        else:
             self.lastpos.add(self.position)   
+
         if self.right != None and self.left != None:
             print((self.left.label, self.label, self.right.label), self.lastpos)
         elif self.label == '*':
@@ -108,7 +112,9 @@ class Node():
             table = self.right.setFollowPos(table, positions)
         elif self.label == '*':
             table = self.left.setFollowPos(table, self.left.lastpos.union(positions))
-        elif self.label != '#':
+        
+        #elif self.label != '#':
+        else:
             if self.followpos == None:
                 self.followpos = positions
             else:
@@ -192,6 +198,9 @@ class DFA:
                 self.stack.append(Node(left=node_A, label='|', right=node_B))
             else:
                 self.stack.append(Node(label=ch))
+        node_A = self.stack.pop()
+        node_B = Node(label='#')
+        self.stack.append(Node(left=node_A, label=ch, right=node_B))
         core = self.stack.pop()
         # Encuentra el lenguaje
         self.language = ''
@@ -213,6 +222,7 @@ class DFA:
         print(followtable)
         #print(followtable)
         transitions, states = core.evaluate(followtable, self.language)
+        print(transitions)
         drawDFA(states, transitions)
 
-nfa = DFA('ab|*a.b.b.c.')
+nfa = DFA('ab|*abb.|*#..')

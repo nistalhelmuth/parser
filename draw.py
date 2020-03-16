@@ -10,6 +10,10 @@ def drawDFA(states, transitions):
             for node in transitions[state][value]:
                 if state == node:
                     print((state, node), value)
+                    G.add_node(str(state)+'_S')
+                    G.add_edge(str(state)+'_S', node)
+                    edge_labels[(str(state)+'_S', node)] = value
+                    edge_labels[(node, str(state)+'_S')] = value
                 G.add_edge(state, node)
                 edge_labels[(state, node)] = value
     pos = nx.spring_layout(G)

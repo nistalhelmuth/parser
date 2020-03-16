@@ -42,8 +42,8 @@ class Node():
 
         if self.label == '.': #caso para a.b
             states, transitions, new_state1 = addState(states, transitions)
-            states, transitions = self.left.evaluate(states, transitions, new_state1, end)
-            states, transitions = self.right.evaluate(states, transitions, start, new_state1)
+            states, transitions = self.left.evaluate(states, transitions, start, new_state1)
+            states, transitions = self.right.evaluate(states, transitions, new_state1, end)
             return states, transitions
 
         if self.label == '|': #caso para a|b
@@ -77,15 +77,20 @@ class Node():
 def closure(states, transitions):
     stack = []
     for state in states:
-        if state != -1 and '#' in transitions[state].keys():
+        print(state)
+        print(transitions.keys())
+        if state not in transitions.keys():
+            continue
+        if '#' in transitions[state].keys():
             stack = stack + transitions[state]['#']
     group = set(states)
     while len(stack):
         element = stack.pop()
-        if element == -1:
-            continue
+        
         if element not in group:
             group.add(element)
+        if element not in transitions.keys():
+            continue
         if '#' in transitions[element].keys():
             for node in transitions[element]['#']:
                 stack.append(node)
@@ -95,7 +100,9 @@ def closure(states, transitions):
 def move(states, transitions, value):
     group = set()
     for state in states:
-        if state != -1 and value in transitions[state].keys():
+        if state not in transitions.keys():
+            continue
+        if  value in transitions[state].keys():
             for element in transitions[state][value]:
                 if element not in group:
                     group.add(element)  
@@ -120,7 +127,7 @@ class NFA:
                 node_A = self.stack.pop()
                 node_B = self.stack.pop()
                 #revisar esto!!!!
-                self.stack.append(Node(left=node_A, label=ch, right=node_B))
+                self.stack.append(Node(left=node_B, label=ch, right=node_A))
             elif ch == '+': #rr*
                 node_A = self.stack.pop()
                 node_B = Node(left=node_A, label='*')
@@ -165,7 +172,7 @@ class DFA:
   
     def createFromDFA(self, start, core_transitions, language, accept):
         transitions = {}
-        Dstate = [closure([0], core_transitions)]
+        Dstate = [closure([start], core_transitions)]
         letters = 'ABCDEFGHI'
         count = 0
         while count < len(Dstate):
@@ -187,6 +194,9 @@ class DFA:
                 self.start = letters[i]
             if accept in Dstate[i]:
                 self.accept.add(letters[i])
+        print(Dstate)
+        print(transitions)
+        print(self.accept)
         self.language = language
         self.transitions = transitions
         self.states = letters[:count]
@@ -223,20 +233,27 @@ class DFA:
   
 EXPRE = 'aaabbbabb'
 #test = input('to evaluate: ')
-nfa = NFA('ab|*a.b.b.')
-nfa_core = nfa.getCore()
+#nfa = NFA('ab|**ab|#|*.#.')
+#nfa_core = nfa.getCore()
 #print(nfa_core[0])
 #print(nfa_core[1])
 #print(nfa_core[2])
+#print(nfa_core[3])
+#print(nfa_core[4])
 #print(EXPRE, nfa.check(EXPRE))
 dfa = DFA()
-dfa.createFromDFA(start=nfa_core[0], core_transitions=nfa_core[2], language=nfa_core[3], accept=nfa_core[4])
+#dfa.createFromDFA(start=nfa_core[0], core_transitions=nfa_core[2], language=nfa_core[3], accept=nfa_core[4])
+my_start = 1
+my_transitions = {1: {'#': [2,8]}, 2: {'#': [3,4]}, 3: {'a': [5]}, 4: {'b': [6]}, 5: {'#': [7]}, 6: {'#': [7]}, 7: {'#': [2]}, 8: {'a': [9]}, 9: {'#': [10, 13]}, 10: {'#': [11, 12]}, 11: {'a': [14]}, 12: {'b': [15]}, 13: {'#': [16]}, 14: {'#': [17]}, 15: {'#': [17]}, 16: {'#': [-1]}, 17: {'#': [-1]}}
+my_language = 'ab'
+my_accept = -1
+dfa.createFromDFA(start=my_start, core_transitions=my_transitions, language=my_language, accept=my_accept)
 dfa_core = dfa.getCore()
-#print(dfa_core[0])
-#print(dfa_core[1])
-#print(dfa_core[2])
-#print(dfa_core[3])
-#print(dfa_core[4])
+print(dfa_core[0])
+print(dfa_core[1])
+print(dfa_core[2])
+print(dfa_core[3])
+print(dfa_core[4])
 #print(EXPRE, dfa.check(EXPRE))
 
 
