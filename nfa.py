@@ -1,4 +1,5 @@
-from draw import drawDFA
+from draw import drawPrettyDFA
+from posfix import conversionToPostfix
 
 class Node():
     def __init__(self,  label, left=None,right=None):
@@ -115,8 +116,8 @@ class NFA:
         crea un arbol según una expresión en posfix
     '''
     def __init__(self, expre):
-        self.start = 0
-        self.accept = -1
+        self.start = -1
+        self.accept = 0
         # Genera el arbol
         self.stack = []
         for ch in expre:
@@ -150,7 +151,7 @@ class NFA:
                 self.language += (letter)
     
     def getCore(self):
-        drawDFA(self.states, self.transitions)
+        drawPrettyDFA(self.states, self.transitions, [self.accept])
         return (self.start, self.states, self.transitions, self.language, self.accept)
   
     def check(self, expre):
@@ -200,16 +201,10 @@ class DFA:
         self.language = language
         self.transitions = transitions
         self.states = letters[:count]
-        
-        #print(self.transitions[1]['#'])
-    
-    #def get_minimize(self):
-    #    states = []
-    #    transitions
 
 
     def getCore(self):
-        drawDFA(self.states, self.transitions)
+        drawPrettyDFA(self.states, self.transitions, [self.accept])
         return (self.start, self.states, self.transitions, self.language, self.accept)
   
     def move(self, state, transitions, value):
@@ -231,29 +226,33 @@ class DFA:
     
 
   
-EXPRE = 'aaabbbabb'
+#exp = "((a|b)*)*"#.((a|(b.b))*.#))"
+#exp = "#.((a|b)|#)*"
+#exp_postfix = conversionToPostfix(exp)
+#nfa = NFA(exp_postfix)
+
 #test = input('to evaluate: ')
-#nfa = NFA('ab|**ab|#|*.#.')
-#nfa_core = nfa.getCore()
-#print(nfa_core[0])
-#print(nfa_core[1])
-#print(nfa_core[2])
-#print(nfa_core[3])
-#print(nfa_core[4])
+nfa = NFA('ab|**ab|#|*.#.')
+nfa_core = nfa.getCore()
+print(nfa_core[0])
+print(nfa_core[1])
+print(nfa_core[2])
+print(nfa_core[3])
+print(nfa_core[4])
 #print(EXPRE, nfa.check(EXPRE))
-dfa = DFA()
-#dfa.createFromDFA(start=nfa_core[0], core_transitions=nfa_core[2], language=nfa_core[3], accept=nfa_core[4])
-my_start = 1
-my_transitions = {1: {'#': [2,8]}, 2: {'#': [3,4]}, 3: {'a': [5]}, 4: {'b': [6]}, 5: {'#': [7]}, 6: {'#': [7]}, 7: {'#': [2]}, 8: {'a': [9]}, 9: {'#': [10, 13]}, 10: {'#': [11, 12]}, 11: {'a': [14]}, 12: {'b': [15]}, 13: {'#': [16]}, 14: {'#': [17]}, 15: {'#': [17]}, 16: {'#': [-1]}, 17: {'#': [-1]}}
-my_language = 'ab'
-my_accept = -1
-dfa.createFromDFA(start=my_start, core_transitions=my_transitions, language=my_language, accept=my_accept)
-dfa_core = dfa.getCore()
-print(dfa_core[0])
-print(dfa_core[1])
-print(dfa_core[2])
-print(dfa_core[3])
-print(dfa_core[4])
+#dfa = DFA()
+##dfa.createFromDFA(start=nfa_core[0], core_transitions=nfa_core[2], language=nfa_core[3], accept=nfa_core[4])
+#my_start = 1
+#my_transitions = {1: {'#': [2,8]}, 2: {'#': [3,4]}, 3: {'a': [5]}, 4: {'b': [6]}, 5: {'#': [7]}, 6: {'#': [7]}, 7: {'#': [2]}, 8: {'a': [9]}, 9: {'#': [10, 13]}, 10: {'#': [11, 12]}, 11: {'a': [14]}, 12: {'b': [15]}, 13: {'#': [16]}, 14: {'#': [17]}, 15: {'#': [17]}, 16: {'#': [-1]}, 17: {'#': [-1]}}
+#my_language = 'ab'
+#my_accept = -1
+#dfa.createFromDFA(start=my_start, core_transitions=my_transitions, language=my_language, accept=my_accept)
+#dfa_core = dfa.getCore()
+#print(dfa_core[0])
+#print(dfa_core[1])
+#print(dfa_core[2])
+#print(dfa_core[3])
+#print(dfa_core[4])
 #print(EXPRE, dfa.check(EXPRE))
 
 
