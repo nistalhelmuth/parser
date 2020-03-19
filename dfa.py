@@ -1,4 +1,4 @@
-from draw import drawPrettyDFA
+from draw import drawPrettyGraph
 from posfix import conversionToPostfix
 
 class Node():
@@ -20,13 +20,14 @@ class Node():
             new_positions = self.left.setPositions(positions)
             self.right.setPositions(new_positions)
             return positions
-        else:
+        elif self.label !='#':
             if len(positions) > 0 :
                 self.position = len(positions)
             else:
                 self.position = 0
             positions.append((self.label, self.position))
             return positions
+        return positions
 
     def setNullable(self):
         if self.label == '|':
@@ -43,12 +44,12 @@ class Node():
         else:
             self.nullable = False
         
-        #if self.right != None and self.left != None:
-        #    print((self.left.label, self.label, self.right.label), self.nullable)
-        #elif self.label == '*':
-        #    print((self.left.label, self.label), self.nullable)
-        #else:
-        #    print((self.label), self.nullable)
+        if self.right != None and self.left != None:
+            print((self.left.label, self.label, self.right.label), self.nullable)
+        elif self.label == '*':
+            print((self.left.label, self.label), self.nullable)
+        else:
+            print((self.label), self.nullable)
         
         return self.nullable
     
@@ -66,15 +67,15 @@ class Node():
                 self.firstpos = A
         elif self.label == '*':
             self.firstpos = self.left.setFirstPos()
-        else:
+        elif self.label != '#':
             self.firstpos.add(self.position)
 
-        #if self.right != None and self.left != None:
-        #    print((self.left.label, self.label, self.right.label), self.firstpos)
-        #elif self.label == '*':
-        #    print((self.left.label, self.label), self.firstpos)
-        #else:
-        #    print((self.label), self.firstpos)
+        if self.right != None and self.left != None:
+            print((self.left.label, self.label, self.right.label), self.firstpos)
+        elif self.label == '*':
+            print((self.left.label, self.label), self.firstpos)
+        else:
+            print((self.label), self.firstpos)
         return self.firstpos
 
     def setLastPos(self):
@@ -91,15 +92,15 @@ class Node():
                 self.lastpos = B
         elif self.label == '*':
             self.lastpos = self.left.setLastPos()
-        else:
+        elif self.label != '#':
             self.lastpos.add(self.position)   
 
-        #if self.right != None and self.left != None:
-        #    print((self.left.label, self.label, self.right.label), self.lastpos)
-        #elif self.label == '*':
-        #    print((self.left.label, self.label), self.lastpos)
-        #else:
-        #    print((self.label), self.lastpos)         
+        if self.right != None and self.left != None:
+            print((self.left.label, self.label, self.right.label), self.lastpos)
+        elif self.label == '*':
+            print((self.left.label, self.label), self.lastpos)
+        else:
+            print((self.label), self.lastpos)         
         return self.lastpos
     
     def setFollowPos(self, table, dic):
@@ -133,8 +134,8 @@ class Node():
                     if (letter, p) in followtable.keys():
                         A = followtable[(letter, p)]
                         U = U.union(A)
-                if len(U) == 0:
-                    continue
+                #if len(U) == 0:
+                #    continue
                 if U not in Dstates:
                     Dstates.append(U)
 
@@ -196,43 +197,68 @@ class DFA:
         # Encuentra el lenguaje
         self.language = ''
         for letter in expre:
-            if letter not in self.language and letter not in '*|().' and letter not in '()':
+            if letter not in self.language and letter not in '*|().#?+':
                 self.language += (letter)
-        #core.show()
-        #print(self.language)
-        #print('positions')
+        print('positions')
         positions = core.setPositions()
-        #print('nullables')
+        print(positions)
+        print('nullables')
         core.setNullable()
-        #print('firstpos')
+        print('firstpos')
         core.setFirstPos()
-        #print('lastpos')
+        print('lastpos')
         core.setLastPos()
-        #print('followpos')
+        print('followpos')
         table = {}
         dic = {}
         for position in positions:
             table[position] = set()
             dic[position[1]] = position[0]
         followtable = core.setFollowPos(table=table, dic=dic)
+        print(followtable)
         transitions, groups, states = core.evaluate(followtable = followtable, language = self.language)
+        self.accept = []
+        for i in range(len(groups)):
+            #esto es para saber cuál es el posicion del utlimo caracter (Z/#)
+            if len(dic.keys())-1 in groups[i]:
+                self.accept.append(states[i])
         self.transitions = transitions
         self.groups = groups
         self.states = states
         self.start = states[0]
-        self.accept = states[-1]
     
     def get_core(self):
-        drawPrettyDFA(self.states, self.transitions, [self.states[-1]])
+        drawPrettyGraph([self.start], self.states, self.transitions, self.accept, 'dfa')
         return self.start, self.states, self.language, self.transitions, self.accept, self.groups
+    
+    def check(self, expre):
+        def move(state, transitions, value):
+            s = state
+            if value in transitions[s].keys():
+                for element in transitions[s][value]:
+                    s = element
+            return s
+        s = self.start
+        for letter in expre:
+            s = move(s, self.transitions, letter)
+        if s in self.accept:
+            return True
+        return False
 
-exp = "((a|b)*.((a|(b.b))*.#))"
+#exp = "0?.(1|#)?.0*"
+#exp = "(a|#).b.(a+).c?"
+exp = "b+.a.b.c+"
+
 exp_postfix = conversionToPostfix(exp)
 dfa = DFA(exp_postfix)
 dfa_core = dfa.get_core()
-print(dfa_core[0])
-print(dfa_core[1])
-print(dfa_core[2])
-print(dfa_core[3])
-print(dfa_core[4])
-print(dfa_core[5])
+print("INICIO :",dfa_core[0])
+print("ESTADOS :",dfa_core[1])
+print("TRANSICIONES :",dfa_core[3])
+print("SIMBOLOS :",dfa_core[2])
+print("ACEPTACION :",dfa_core[4])
+print("CONJUNTOS :",dfa_core[5])
+
+while True:
+    test = input('to evaluate: ')
+    print(test, dfa.check(test))

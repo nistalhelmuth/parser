@@ -23,9 +23,12 @@ from graphviz import Digraph
 #    nx.draw_networkx_edge_labels(G, pos, edge_labels=edge_labels, label_pos=0.25)
 #    plt.show()
 
-def drawPrettyDFA(states, transitions, accept_states):
-    f = Digraph('finite_state_machine', filename='fsm.gv')
+def drawPrettyGraph(start_states, states, transitions, accept_states, name):
+    f = Digraph('finite_state_machine', filename=name)
     f.attr(rankdir='LR', size='8,5')
+    #f.attr('node', shape='Mdiamond')
+    #for start in start_states:
+    #    f.node(str(start))
     f.attr('node', shape='doublecircle')
     for accept in accept_states:
         f.node(str(accept))

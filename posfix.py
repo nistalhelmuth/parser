@@ -22,7 +22,7 @@ def conversionToPostfix(exp):
     output = []
     
     for i in exp: 
-        if i.isalpha() or i == '#': 
+        if i.isalnum() or i == '#': 
             output.append(i) 
             
         elif i  == '(': 
